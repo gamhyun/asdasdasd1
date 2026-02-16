@@ -3,17 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Web App</title>
+    <title>Diamond Candy Sparkle</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app-container">
-        <button id="theme-toggle" type="button" aria-label="Toggle color theme">Dark Mode</button>
-        <interactive-card title="Welcome" message="This is a modern web component."></interactive-card>
-    </div>
+    <main id="scene" class="scene">
+        <section class="hero">
+            <p class="kicker">SPARKLE STAGE</p>
+            <h1>3 Carat Diamond Ring and Candy Pop</h1>
+            <p class="description">Click the ring or candy for an extra glitter burst.</p>
+        </section>
+
+        <section class="showcase" aria-label="Animated jewelry and candy display">
+            <button class="ring spark-target" aria-label="Diamond ring">
+                <span class="diamond-core"></span>
+                <span class="ring-band"></span>
+            </button>
+
+            <button class="candy spark-target" aria-label="Candy pop">
+                <span class="candy-stick"></span>
+                <span class="candy-ball"></span>
+            </button>
+        </section>
+    </main>
     <script src="main.js" type="module"></script>
 </body>
 </html>

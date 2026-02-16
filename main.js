@@ -1,107 +1,84 @@
-const cardTemplate = document.createElement('template');
-cardTemplate.innerHTML = `
-    <style>
-        :host {
-            display: block;
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: var(--shadow-elevation-high);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
+const scene = document.querySelector('#scene');
+const sparkTargets = document.querySelectorAll('.spark-target');
 
-        .card-glow {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), var(--color-glow), transparent 40%);
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            pointer-events: none; /* Make sure it doesn't block mouse events on the card */
-        }
+function randomBetween(min, max) {
+    return Math.random() * (max - min) + min;
+}
 
-        :host(:hover) .card-glow {
-            opacity: 1;
-        }
+function createSpark(x, y, burstScale = 1) {
+    const spark = document.createElement('span');
+    const angle = randomBetween(0, Math.PI * 2);
+    const distance = randomBetween(24, 86) * burstScale;
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.sin(angle) * distance;
+    const size = randomBetween(5, 11);
+    const isBig = Math.random() > 0.78;
 
-        .card-content {
-            background-color: var(--color-card-bg);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 12px;
-        }
+    spark.className = `spark${isBig ? ' big' : ''}`;
+    spark.style.setProperty('--x', `${x}px`);
+    spark.style.setProperty('--y', `${y}px`);
+    spark.style.setProperty('--dx', `${dx}px`);
+    spark.style.setProperty('--dy', `${dy}px`);
+    spark.style.setProperty('--size', `${size}px`);
 
-        h2 {
-            color: var(--color-accent);
-            margin-top: 0;
-            font-size: 2.5rem;
-            font-weight: 700;
-        }
+    scene.appendChild(spark);
+    spark.addEventListener('animationend', () => spark.remove(), { once: true });
+}
 
-        p {
-            font-size: 1.2rem;
-            line-height: 1.6;
-        }
-    </style>
-    <div class="card-glow"></div>
-    <div class="card-content">
-        <h2 id="title"></h2>
-        <p id="message"></p>
-        <slot></slot>
-    </div>
-`;
-
-class InteractiveCard extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-        this.shadowRoot.appendChild(cardTemplate.content.cloneNode(true));
-    }
-
-    connectedCallback() {
-        this.shadowRoot.querySelector('#title').innerText = this.getAttribute('title');
-        this.shadowRoot.querySelector('#message').innerText = this.getAttribute('message');
-
-        this.addEventListener('mousemove', (e) => {
-            const rect = this.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            this.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
-            this.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
-        });
+function sparkleBurst(x, y, count = 20, burstScale = 1) {
+    for (let i = 0; i < count; i += 1) {
+        createSpark(x, y, burstScale);
     }
 }
 
-customElements.define('interactive-card', InteractiveCard);
-
-const THEME_KEY = 'theme';
-const themeToggle = document.querySelector('#theme-toggle');
-const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-
-function getInitialTheme() {
-    const savedTheme = localStorage.getItem(THEME_KEY);
-    if (savedTheme === 'light' || savedTheme === 'dark') {
-        return savedTheme;
-    }
-    return systemPrefersDark.matches ? 'dark' : 'light';
+function centerPoint(element) {
+    const rect = element.getBoundingClientRect();
+    const parentRect = scene.getBoundingClientRect();
+    return {
+        x: rect.left + rect.width / 2 - parentRect.left,
+        y: rect.top + rect.height / 2 - parentRect.top,
+    };
 }
 
-function applyTheme(theme) {
-    document.body.setAttribute('data-theme', theme);
-    if (themeToggle) {
-        themeToggle.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
-        themeToggle.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
-    }
+function popElement(element) {
+    element.classList.remove('pop');
+    void element.offsetWidth;
+    element.classList.add('pop');
 }
 
-applyTheme(getInitialTheme());
+sparkTargets.forEach((target) => {
+    target.addEventListener('click', (event) => {
+        const parentRect = scene.getBoundingClientRect();
+        const x = event.clientX - parentRect.left;
+        const y = event.clientY - parentRect.top;
 
-if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-        const currentTheme = document.body.getAttribute('data-theme') || 'dark';
-        const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        applyTheme(nextTheme);
-        localStorage.setItem(THEME_KEY, nextTheme);
+        sparkleBurst(x, y, 28, 1.2);
+        popElement(target);
+    });
+});
+
+scene.addEventListener('click', (event) => {
+    if (event.target.closest('.spark-target')) {
+        return;
+    }
+
+    const parentRect = scene.getBoundingClientRect();
+    sparkleBurst(
+        event.clientX - parentRect.left,
+        event.clientY - parentRect.top,
+        16,
+        0.95
+    );
+});
+
+function autoTwinkle() {
+    sparkTargets.forEach((target) => {
+        const { x, y } = centerPoint(target);
+        const nx = x + randomBetween(-36, 36);
+        const ny = y + randomBetween(-44, 44);
+        sparkleBurst(nx, ny, 4, 0.75);
     });
 }
+
+setInterval(autoTwinkle, 900);
+autoTwinkle();
