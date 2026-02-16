@@ -1,12 +1,16 @@
 :root {
     --font-primary: 'Roboto', sans-serif;
 
-    /* Using OKLCH for more vibrant and consistent colors */
+    /* Dark theme defaults */
     --color-primary: oklch(65.7% 0.25 264.4);
     --color-secondary: oklch(75% 0.22 255);
     --color-accent: oklch(80% 0.28 280);
     --color-text: oklch(95% 0.02 264.4);
     --color-bg: oklch(20% 0.05 264.4);
+    --color-card-bg: oklch(25% 0.05 264.4 / 0.8);
+    --color-pattern-bg: #1a1a1a;
+    --color-pattern-dot: #333333;
+    --color-glow: oklch(80% 0.28 280 / 0.15);
 
     --shadow-color: 240deg 10% 8%;
     --shadow-elevation-medium: 
@@ -21,6 +25,19 @@
         5.3px 10.6px 13.4px -1.7px hsl(var(--shadow-color) / 0.36);
 }
 
+body[data-theme="light"] {
+    --color-primary: oklch(58% 0.17 250);
+    --color-secondary: oklch(70% 0.16 235);
+    --color-accent: oklch(48% 0.2 300);
+    --color-text: oklch(22% 0.04 250);
+    --color-bg: oklch(97% 0.02 250);
+    --color-card-bg: oklch(99% 0.01 250 / 0.88);
+    --color-pattern-bg: #f3f4f8;
+    --color-pattern-dot: #d8dbe4;
+    --color-glow: oklch(68% 0.17 280 / 0.18);
+    --shadow-color: 240deg 8% 42%;
+}
+
 body {
     font-family: var(--font-primary);
     background-color: var(--color-bg);
@@ -29,12 +46,19 @@ body {
     display: grid;
     place-content: center;
     min-height: 100vh;
-    background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="100%25" height="100%25"%3E%3Crect x="0" y="0" width="100%25" height="100%25" fill="%231a1a1a" /%3E%3Cg fill="%23333333"%3E%3Crect x="0" y="0" width="5" height="5" /%3E%3Crect x="5" y="5" width="5" height="5" /%3E%3C/g%3E%3C/svg%3E');
+    background-image:
+        radial-gradient(circle at 15% 20%, color-mix(in oklch, var(--color-accent) 12%, transparent), transparent 40%),
+        radial-gradient(circle at 85% 80%, color-mix(in oklch, var(--color-primary) 12%, transparent), transparent 35%),
+        linear-gradient(var(--color-pattern-bg), var(--color-pattern-bg));
+    transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 #app-container {
     padding: 2rem;
     width: clamp(300px, 90vw, 1200px);
+    display: grid;
+    gap: 1rem;
+    justify-items: start;
 }
 
 /* Basic button style for interactivity */
@@ -54,4 +78,8 @@ button {
 button:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-elevation-high);
+}
+
+#theme-toggle {
+    justify-self: end;
 }

@@ -15,7 +15,7 @@ cardTemplate.innerHTML = `
             top: 0; left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), oklch(80% 0.28 280 / 0.15), transparent 40%);
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), var(--color-glow), transparent 40%);
             opacity: 0;
             transition: opacity 0.5s ease;
             pointer-events: none; /* Make sure it doesn't block mouse events on the card */
@@ -26,7 +26,7 @@ cardTemplate.innerHTML = `
         }
 
         .card-content {
-            background-color: oklch(25% 0.05 264.4 / 0.8);
+            background-color: var(--color-card-bg);
             backdrop-filter: blur(10px);
             padding: 2rem;
             border-radius: 12px;
@@ -74,3 +74,34 @@ class InteractiveCard extends HTMLElement {
 }
 
 customElements.define('interactive-card', InteractiveCard);
+
+const THEME_KEY = 'theme';
+const themeToggle = document.querySelector('#theme-toggle');
+const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+function getInitialTheme() {
+    const savedTheme = localStorage.getItem(THEME_KEY);
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+        return savedTheme;
+    }
+    return systemPrefersDark.matches ? 'dark' : 'light';
+}
+
+function applyTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    if (themeToggle) {
+        themeToggle.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+        themeToggle.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+    }
+}
+
+applyTheme(getInitialTheme());
+
+if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.body.getAttribute('data-theme') || 'dark';
+        const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(nextTheme);
+        localStorage.setItem(THEME_KEY, nextTheme);
+    });
+}
